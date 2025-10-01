@@ -32,7 +32,7 @@ OR, use a local server for a better experience:
  
 # If you have Python installed
 python -m http.server 8000
-# Then visit http://localhost:8000
+# Then visit https://devdesk-task-manager.netlify.app/
 
 3: Firebase Setup (Optional)
 Follow these steps to enable cloud synchronization across devices:
