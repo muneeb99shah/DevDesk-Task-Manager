@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevDesk Task Manager Pro</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.17/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+   
+</head>
+<body class="min-h-screen p-4 md:p-8">
+    <div id="app-container" class="mx-auto max-w-7xl">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-extrabold text-gray-800 mb-2">DevDesk Task Manager Pro 💻</h1>
+            <p id="user-info" class="text-sm text-gray-500 font-medium">All data saved locally in your browser</p>
+        </header>
+
+        <!-- Main Layout: Form & Timer -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            
+            <!-- New Task Input Form -->
+            <div class="lg:col-span-2 dev-panel p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-3">New Task Input</h2>
+                <form id="note-form" class="space-y-5">
+                    <div>
+                        <input type="text" id="note-title" placeholder="Title (e.g., Fix Auth Bug in React Component)"
+                               class="input-focus w-full text-lg font-medium p-3 border border-gray-300 rounded-lg transition duration-150 ease-in-out" required>
+                    </div>
+                    
+                    <div>
+                        <div id="new-task-toolbar" class="markdown-toolbar flex space-x-2 p-2 bg-gray-100 border border-b-0 border-gray-300 rounded-t-lg"></div>
+                        <textarea id="note-content" placeholder="Task Details (Use the toolbar or Markdown for formatting)"
+                                  rows="6" class="input-focus w-full p-3 border border-gray-300 rounded-b-lg transition duration-150 ease-in-out" required></textarea>
+                        <p class="text-xs text-gray-500 mt-1">Details support Markdown (e.g., **bold**, - list, ```code```).</p>
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row sm:items-end justify-between space-y-4 sm:space-y-0 sm:space-x-4">
+                        <div class="w-full sm:w-1/3">
+                            <label for="note-category" class="text-sm font-medium text-gray-700 block mb-1">Category</label>
+                            <select id="note-category" class="input-focus w-full p-3 border border-gray-300 rounded-lg text-gray-700 shadow-sm transition duration-150">
+                                <option value="Freelancing" selected>🚀 Freelancing/Clients</option>
+                                <option value="Code Ideas">💡 Code Ideas/Tech</option>
+                                <option value="General">📚 General Topics</option>
+                                <option value="Urgent">🔥 Urgent Priority</option>
+                            </select>
+                        </div>
+
+                        <div class="w-full sm:w-1/3">
+                            <label for="note-datetime" class="text-sm font-medium text-gray-700 block mb-1">Due Date & Time</label>
+                            <input type="datetime-local" id="note-datetime" 
+                                   class="input-focus w-full p-3 border border-gray-300 rounded-lg text-gray-700 shadow-sm transition duration-150">
+                        </div>
+
+                        <button type="submit" id="add-task-btn"
+                                class="w-full sm:w-auto px-6 py-3 bg-indigo-600 text-white font-bold rounded-full shadow-lg hover:bg-indigo-700 transition duration-300 ease-in-out transform hover:scale-[1.02] active:scale-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                            + Add Task
+                        </button>
+                    </div>
+
+                    <!-- Timer Options for Task -->
+                    <div id="task-timer-options" class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200 hidden">
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">⏰ Start Timer for This Task</h4>
+                        <div class="flex space-x-2">
+                            <button type="button" class="quick-timer-btn px-3 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition" data-minutes="25">25min</button>
+                            <button type="button" class="quick-timer-btn px-3 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition" data-minutes="45">45min</button>
+                            <button type="button" class="quick-timer-btn px-3 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition" data-minutes="60">1 hour</button>
+                            <button type="button" class="quick-timer-btn px-3 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition" data-minutes="90">1.5 hours</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Enhanced Professional Timer -->
+            <div class="lg:col-span-1 dev-panel p-6 flex flex-col justify-center space-y-6 bg-indigo-50 border-indigo-200">
+                <h2 class="text-xl font-bold text-indigo-800 text-center">Professional Focus Timer</h2>
+                
+                <!-- Timer Mode Selection -->
+                <div class="flex space-x-2 mb-4">
+                    <button id="pomodoro-mode" class="flex-1 px-3 py-2 bg-green-500 text-white text-sm font-medium rounded-lg transition hover:bg-green-600">Pomodoro (25m)</button>
+                    <button id="deep-work-mode" class="flex-1 px-3 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg transition hover:bg-blue-600">Deep Work (90m)</button>
+                    <button id="custom-mode" class="flex-1 px-3 py-2 bg-purple-500 text-white text-sm font-medium rounded-lg transition hover:bg-purple-600">Custom</button>
+                </div>
+
+                <!-- Custom Time Input -->
+                <div id="custom-time-input" class="hidden space-y-3">
+                    <div class="flex space-x-3">
+                        <div class="flex-1">
+                            <label class="text-sm font-medium text-indigo-800">Hours</label>
+                            <input type="number" id="timer-hours" value="1" min="0" max="12" class="w-full p-2 border border-indigo-300 rounded-lg text-center">
+                        </div>
+                        <div class="flex-1">
+                            <label class="text-sm font-medium text-indigo-800">Minutes</label>
+                            <input type="number" id="timer-minutes" value="0" min="0" max="59" class="w-full p-2 border border-indigo-300 rounded-lg text-center">
+                        </div>
+                        <div class="flex-1">
+                            <label class="text-sm font-medium text-indigo-800">Seconds</label>
+                            <input type="number" id="timer-seconds" value="0" min="0" max="59" class="w-full p-2 border border-indigo-300 rounded-lg text-center">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="timer-progress" class="timer-progress h-2 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                </div>
+
+                <!-- Timer Display -->
+                <div id="timer-box" class="p-6 rounded-xl bg-white shadow-inner text-center">
+                    <div id="timer-display">01:00:00</div>
+                    <div id="timer-mode" class="text-sm text-gray-600 mt-2">Custom Timer</div>
+                    <div id="active-task-info" class="text-xs text-gray-500 mt-1 hidden"></div>
+                </div>
+
+                <!-- Timer Controls -->
+                <div class="flex space-x-3 justify-center">
+                    <button id="timer-start" class="px-5 py-2 bg-green-500 text-white font-bold rounded-full shadow-md hover:bg-green-600 transition">
+                        ▶ Start
+                    </button>
+                    <button id="timer-pause" disabled class="px-5 py-2 bg-yellow-500 text-white font-bold rounded-full shadow-md hover:bg-yellow-600 transition disabled:opacity-50">
+                        ⏸ Pause
+                    </button>
+                    <button id="timer-reset" class="px-5 py-2 bg-gray-400 text-white font-bold rounded-full shadow-md hover:bg-gray-500 transition">
+                        ⏹ Reset
+                    </button>
+                </div>
+
+                <!-- Session Info -->
+                <div id="session-info" class="text-center text-sm text-gray-600 hidden">
+                    <div>Session: <span id="current-session">1</span>/4</div>
+                    <div>Next: <span id="next-break">5m</span> break</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task Display Area -->
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold text-gray-800 border-b pb-2">Active Tasks</h2>
+            <div class="flex space-x-2">
+                <button id="sort-by-date" class="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm hover:bg-gray-300 transition">Sort by Date</button>
+                <button id="sort-by-priority" class="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm hover:bg-gray-300 transition">Sort by Priority</button>
+            </div>
+        </div>
+        <div id="notes-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <p id="loading-message" class="col-span-full text-center text-gray-500 italic">Loading tasks...</p>
+        </div>
+    </div>
+
+    <!-- Edit Note Modal -->
+    <div id="edit-modal" class="modal-backdrop hidden">
+        <div class="fixed inset-0 flex items-center justify-center p-4">
+            <div class="bg-white dev-panel w-full max-w-lg shadow-2xl">
+                <div class="p-6">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Edit Task</h3>
+                    <form id="edit-note-form" class="space-y-5">
+                        <input type="hidden" id="edit-note-id">
+                        <div>
+                            <label for="edit-note-title" class="block text-sm font-medium text-gray-700">Title</label>
+                            <input type="text" id="edit-note-title" class="input-focus w-full text-lg font-medium p-3 border border-gray-300 rounded-lg" required>
+                        </div>
+                        <div>
+                            <label for="edit-note-content" class="block text-sm font-medium text-gray-700">Details</label>
+                            <div id="edit-modal-toolbar" class="markdown-toolbar flex space-x-2 p-2 bg-gray-100 border border-b-0 border-gray-300 rounded-t-lg"></div>
+                            <textarea id="edit-note-content" rows="6" class="input-focus w-full p-3 border border-gray-300 rounded-b-lg" required></textarea>
+                        </div>
+                        <div class="flex space-x-4">
+                            <div class="w-1/2">
+                                <label for="edit-note-category" class="block text-sm font-medium text-gray-700">Category</label>
+                                <select id="edit-note-category" class="input-focus w-full p-3 border border-gray-300 rounded-lg text-gray-700">
+                                    <option value="Freelancing">🚀 Freelancing/Clients</option>
+                                    <option value="Code Ideas">💡 Code Ideas/Tech</option>
+                                    <option value="General">📚 General Topics</option>
+                                    <option value="Urgent">🔥 Urgent Priority</option>
+                                </select>
+                            </div>
+                            <div class="w-1/2">
+                                <label for="edit-note-datetime" class="block text-sm font-medium text-gray-700">Due Date & Time</label>
+                                <input type="datetime-local" id="edit-note-datetime" class="input-focus w-full p-3 border border-gray-300 rounded-lg text-gray-700">
+                            </div>
+                        </div>
+                        <div class="flex justify-end space-x-3 pt-4">
+                            <button type="button" id="cancel-edit" class="px-6 py-2 text-gray-600 rounded-full hover:bg-gray-100 transition">Cancel</button>
+                            <button type="submit" class="px-6 py-2 bg-indigo-600 text-white font-bold rounded-full shadow-md hover:bg-indigo-700 transition">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmation-modal" class="modal-backdrop hidden">
+        <div class="fixed inset-0 flex items-center justify-center p-4">
+            <div class="bg-white rounded-xl w-full max-w-sm shadow-2xl p-6">
+                <h4 class="text-xl font-bold text-gray-800 mb-4">Confirm Deletion</h4>
+                <p id="confirm-message" class="text-gray-600 mb-6">Are you sure you want to delete this task?</p>
+                <div class="flex justify-end space-x-3">
+                    <button id="cancel-confirm" class="px-4 py-2 text-gray-600 rounded-full hover:bg-gray-100 transition">Cancel</button>
+                    <button id="execute-confirm" class="px-6 py-2 bg-red-600 text-white font-bold rounded-full shadow-md hover:bg-red-700 transition">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+
+   
+    <script src="devsesk.js"></script>
+</body>
+</html>
